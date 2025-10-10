@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🪐 Saturn Planetary Clock</title>
+<style>
+  body {
+    background: radial-gradient(ellipse at center, #0a0a0f 0%, #000 100%);
+    color: #fff;
+    font-family: "Orbitron", sans-serif;
+    text-align: center;
+    margin-top: 10%;
+    overflow: hidden;
+  }
+  h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+  }
+  .clock {
+    font-size: 1.5em;
+    margin: 10px 0;
+  }
+  canvas {
+    margin-top: 30px;
+  }
+</style>
+</head>
+<body>
+<h1>🪐 Saturn Planetary Clock</h1>
+<div class="clock" id="earthTime">🌍 Earth Time: --:--:--</div>
+<div class="clock" id="saturnTime">🪐 Saturn Time: --:--:--</div>
+<div class="clock" id="saturnSol">🧭 Saturn Sol: 0</div>
+
+<canvas id="saturnCanvas" width="300" height="300"></canvas>
+
+<script>
+// Saturn day length (10 hours 33 minutes 38 seconds)
+const SATURN_DAY_SECONDS = 10 * 3600 + 33 * 60 + 38;
+
+function getSaturnTime() {
+  const now = Date.now() / 1000;
+  const saturnDay = Math.floor(now / SATURN_DAY_SECONDS);
+  const fraction = (now % SATURN_DAY_SECONDS) / SATURN_DAY_SECONDS;
+  const hours = Math.floor(fraction * 24);
+  const minutes = Math.floor((fraction * 24 * 60) % 60);
+  const seconds = Math.floor((fraction * 24 * 3600) % 60);
+  return { hours, minutes, seconds, saturnDay };
+}
+
+function pad(num) {
+  return num.toString().padStart(2, "0");
+}
+
+function updateClock() {
+  const earth = new Date();
+  const { hours, minutes, seconds, saturnDay } = getSaturnTime();
+
+  document.getElementById("earthTime").textContent =
+    `🌍 Earth Time: ${earth.toLocaleTimeString()}`;
+  document.getElementById("saturnTime").textContent =
+    `🪐 Saturn Time: ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  document.getElementById("saturnSol").textContent =
+    `🧭 Saturn Sol: ${saturnDay}`;
+
+  drawSaturn();
+}
+
+function drawSaturn() {
+  const canvas = document.getElementById("saturnCanvas");
+  const ctx = canvas.getContext("2d");
+  const time = Date.now() / 1000;
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Saturn body
+  const gradient = ctx.createRadialGradient(centerX - 10, centerY - 10, 30, centerX, centerY, 80);
+  gradient.addColorStop(0, "#ffcc66");
+  gradient.addColorStop(1, "#d2a679");
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 60, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Rings
+  ctx.save();
+  ctx.translate(centerX, centerY);
+  ctx.rotate(time / 5); // animate ring rotation
+  ctx.strokeStyle = "#c2b280";
+  ctx.lineWidth = 8;
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 80 + i * 10, 30 + i * 5, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Tiny moon
+  ctx.beginPath();
+  ctx.fillStyle = "#ccc";
+  const moonX = centerX + Math.cos(time / 2) * 120;
+  const moonY = centerY + Math.sin(time / 2) * 40;
+  ctx.arc(moonX, moonY, 5, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+</body>
+</html>
