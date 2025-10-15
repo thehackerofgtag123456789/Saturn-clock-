@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Planetary Clock 🌌</title>
+  <style>
+    body {
+      background: radial-gradient(circle at top, #030b24, #000);
+      color: #e6e6e6;
+      font-family: "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      font-size: 2em;
+      color: #66ccff;
+      margin-bottom: 1em;
+      text-shadow: 0 0 10px #008cff;
+    }
+    table {
+      border-collapse: collapse;
+      width: 60%;
+      max-width: 600px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+    th, td {
+      padding: 10px 15px;
+      text-align: left;
+    }
+    th {
+      background-color: rgba(0,0,0,0.3);
+      font-size: 1.1em;
+      color: #00ffff;
+    }
+    tr:nth-child(even) {
+      background-color: rgba(255,255,255,0.05);
+    }
+    td.planet {
+      font-weight: bold;
+      color: #89d6ff;
+    }
+    footer {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>🪐 Planetary Clock</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Planet</th>
+        <th>Local Time</th>
+      </tr>
+    </thead>
+    <tbody id="planet-times"></tbody>
+  </table>
+  <footer>Times calculated using solar day lengths for each planet.</footer>
+
+  <script>
+    const planetDayLengths = {
+      "Mercury": 1407.6,  // in Earth hours
+      "Venus": 5832.5,
+      "Earth": 24.0,
+      "Mars": 24.6,
+      "Jupiter": 9.9,
+      "Saturn": 10.7,
+      "Uranus": 17.2,
+      "Neptune": 16.1
+    };
+
+    function getPlanetTime(planet, earthDate = new Date()) {
+      const planetDayHours = planetDayLengths[planet];
+      const secondsSinceMidnight = (
+        earthDate.getUTCHours() * 3600 +
+        earthDate.getUTCMinutes() * 60 +
+        earthDate.getUTCSeconds()
+      );
+      const planetSecondsInDay = planetDayHours * 3600;
+      const planetTimeSeconds = (secondsSinceMidnight / 86400) * planetSecondsInDay;
+
+      const hours = Math.floor((planetTimeSeconds / 3600) % planetDayHours);
+      const minutes = Math.floor((planetTimeSeconds % 3600) / 60);
+      const seconds = Math.floor(planetTimeSeconds % 60);
+
+      return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    }
+
+    function updateClock() {
+      const tbody = document.getElementById("planet-times");
+      tbody.innerHTML = "";
+      for (const planet in planetDayLengths) {
+        const row = document.createElement("tr");
+        const planetCell = document.createElement("td");
+        const timeCell = document.createElement("td");
+        planetCell.className = "planet";
+        planetCell.textContent = planet;
+        timeCell.textContent = getPlanetTime(planet);
+        row.appendChild(planetCell);
+        row.appendChild(timeCell);
+        tbody.appendChild(row);
+      }
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>
